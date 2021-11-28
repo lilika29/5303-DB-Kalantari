@@ -1,1 +1,85 @@
-
+<h1>Midwestern State University Course Schedule</h1>
+  <div class ="teststile">
+      <button @click="$router.push('mainpage')">Home</button>
+      <button @click="$router.push('Editstudent')">Edit course  schedule</button>
+    </div>
+    <br><br>
+   <form v-on:submit.prevent="SeeStudent" class="SeeStudent">
+    <div ref="content">
+		<table class ="help">
+			<tr>
+			 <td>
+				FirstName<input type="text" id="FirstName" name="FirstName"  v-model="tosend.FirstName" />
+			 </td>
+			 <td>
+				LastName<input type="text" id="LastName" name="LastName"  v-model="tosend.LastName" />
+			 </td>
+			 <td>
+				Mnumber<input type="text" id="Mnumber" name="Mnumber"  v-model="tosend.Mnumber" />
+			 </td>
+			 <td>
+				<select
+				name="Classification"
+				id="Classification"
+				v-model="tosend.Classification"
+			  >
+				<option value="Freshman">Freshman</option>
+				<option value="Sophomore">Sophomore</option>
+				<option value="junior">junior</option>
+				<option value="Senior">Senior</option>
+			  </select>
+			 </td>
+			</tr>
+			<tr>
+				 <td>
+					<select name="Display" id="Display" v-model="tosend.Display">
+						<option value="25">25</option>
+						<option value="50">50</option>
+						<option value="100">100</option></select
+					  >
+				</td>
+				 <td>
+					 GPA <input type="number" id="GPA" name="GPA" v-model="tosend.GPA"/>
+				 </td>
+				 <td> <select name="GPAL" id="GPAL" v-model="tosend.GPAL">
+					<option value="0">Greater</option>
+					<option value="1">Less</option>
+					</select></td>
+				
+			</tr>
+			
+			
+		</table>
+    </div>
+    
+    <div class="submit">
+    <button>GO</button>
+  </div>
+  </form>
+  <style>
+	  .help{
+		display: table;
+    border-collapse: separate;
+    box-sizing: border-box;
+    text-indent: initial;
+    white-space: normal;
+    line-height: normal;
+    font-weight: normal;
+    font-size: medium;
+    font-style: normal;
+    color: -internal-quirk-inherit;
+    text-align: start;
+    border-spacing: 2px;
+    border-color: grey;
+    font-variant: normal;
+	  }
+	  .teststile{
+		padding: 10px;
+       text-align: left;
+	   font-size: 12px;
+    font-family: Arial, Helvetica, Geneva, sans-serif;
+	border: none;
+}
+	  
+	 
+  </style>
