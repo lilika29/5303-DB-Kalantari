@@ -1,1 +1,137 @@
+nm0005658
+nm0000428
+nm0581683
 
+
+//genre
+{'War', 'History', 'Animation', 'Talk-Show', 'Short', 'Musical', 'Comedy', 'Fantasy', 'Sci-Fi', 'Sport', 'Reality-TV', 'Thriller', 'Game-Show', 'Music', 'Biography', 'Adult', 'Crime', 'Myst                                                ery', 'Romance', 'Documentary', 'Family', 'News', 'Adventure', 'Action', 'Drama', 'Horror', 'Film-Noir', 'Western'}
+category
+{'movie', 'radioEpisode', 'videoGame', 'tvSeries', 'tvPilot', 'short', 'tvMiniSeries', 'video', 'tvSpecial', 'tvMovie', 'tvEpisode', 'tvShort'}
+
+
+//categories
+    if('\\' in row[5]):
+                    continue
+                else:
+                    if(int(row[5]) >1950):
+                        Category.add(row[1])
+                        listedg = row[8].split(",")
+                        for g in listedg:
+                            if('\\' not in g):
+                                gene.add(g)  
+            print(gene)
+            print(Category)          
+            for gen in gene:
+                name = "g00"+str(count)
+                sql ='INSERT INTO `Genre` (`gid`, `genre`) VALUES ("{names}", "{genre}")'.format(names=name,genre=gen)
+                cnx.query(sql)
+                count+=1
+            print("gene done")
+            for cat in Category:
+                name2 = "cat00"+str(num)
+                sql2 ='INSERT INTO `Categories` (`CategoryID`, `Category`) VALUES ("{catid}", "{cate}")'.format(catid=name2,cate=cat)
+                cnx.query(sql2)
+                num+=1
+            print("cat done")
+ //name
+if('\\' in row[5]):
+                    continue
+                else:
+                   
+                    if(int(row[5]) >=1950 and row[1] =='movie'):
+                       
+                        sql ='INSERT INTO `Movies` (`mID`, `Title`, `isAdult`, `runtimeMinutes`, `Year`) VALUES ("{id}", "{title}", {isAdult}, {min}, {year})'.format(id=row[0],title=row[2],isAdult =bool(row[4]), min = int(row[7]) if '\\' not in row[7] else "NULL" , year =int(row[5])if '\\' not in row[5] else "NULL")
+                        cnx.query(sql) 
+                        """  cql2 ='SELECT `CategoryID` FROM `Categories` WHERE `Category`="{titlety}"'.format(titlety=row[1])
+                        answer = cnx.query(cql2)
+                        titleid = answer['data'][0]['CategoryID']
+                        sql3 ='INSERT INTO `MovieTitles` (`mid`, `catid`) VALUES ("{mid}", "{catid}")'.format(mid =row[0],catid =titleid)
+                        cnx.query(sql3)  """
+                        genres = row[8].split(',')
+                        for gen in genres:
+                            if('\\' not in gen):
+                                sql4 ='SELECT `gid` FROM `Genre` WHERE `genre` ="{ger}"'.format(ger=gen)
+                                answer2 = cnx.query(sql4)
+                                genid = answer2['data'][0]['gid']
+                                sql5 ='INSERT INTO `MovieGenres` (`mid`, `genre`) VALUES ("{mid}", "{genre}")'.format(mid=row[0],genre=genid)
+                                cnx.query(sql5)
+//proffesions
+for row in movieData:
+                prof = row[4].split(',')
+                for p in prof:
+                    if('//' not in p):
+                        Profession.add(p)
+           
+            for profs in Profession:
+                if(profs != ''):
+                    name = "p00"+str(count)
+                    sql ='INSERT INTO `Profession` (`ProfessionID`, `Job`)  VALUES ("{ProfessionID}", "{Job}")'.format(ProfessionID=name,Job=profs)
+                    cnx.query(sql)
+                    count+=1   
+//actor Known works,
+
+knowworks = row[5].split(',')
+                knownfor = set()
+                haswork = False
+                for works in  knowworks:
+                    sql = 'SELECT `mID` FROM `Movies` WHERE `mID` = "{known}"'.format(known=works)
+                    answer = cnx.query(sql)
+                    if(len(answer['data'])>0):
+                        knownfor.add(answer['data'][0]['mID'])
+                        haswork = True
+                if(haswork):
+                    Actorname = row[1].split()
+                    firstname = Actorname[0]
+                    lastname = Actorname[-1]
+                    professions = row[4].split(',')
+                    sql2 ='INSERT INTO `Actors` (`pid`, `birthYr`, `deathYr`, `firstname`, `Lastname`) VALUES ("{pid}", {birth}, {death}, "{fname}", "{lname}")'.format(pid=row[0],birth=int(row[2]) if '\\' not in row[2] else "NULL",death=int(row[3]) if '\\' not in row[3] else "NULL",fname =firstname,lname =lastname )
+                    cnx.query(sql2)
+                    for k in knownfor:
+                        sql3 = 'INSERT INTO `knownForTitles` (`pid`, `mid`) VALUES ("{pid}", "{mid}")'.format(pid=row[0],mid=k)
+                        cnx.query(sql3)
+                    for p in professions:
+                        sql4 = 'SELECT `ProfessionID` FROM `Profession` WHERE `Job` ="{pr}"'.format(pr =p)
+                        answer = cnx.query(sql4)
+                        if(len(answer['data'])>0):
+                            jvalue = answer['data'][0]['ProfessionID']
+                            sql5 = 'INSERT INTO `ActorProfession` (`Pid`, `ProfessionID`) VALUES ("{pid}", "{jo}")'.format(pid =row[0], jo = jvalue)
+                            cnx.query(sql5)
+
+
+    //ratings
+    sql = 'SELECT `mID` FROM `Movies` WHERE `mID` = "{movie}"'.format(movie=row[0])
+                answer =cnx.query(sql)
+                if(len(answer['data'])>0):
+                    sql2 = 'INSERT INTO `Ratings` (`mid`, `averageRating`, `numVotes`) VALUES ("{row1}", {row2}, {row3})'.format(row1=row[0],row2 = row[1] if '\\' not in row[1] else "NULL",row3 = int(row[2]) if '\\' not in row[2] else "NULL")
+                    cnx.query(sql2)
+    //Dicrectors ,writers
+    sql = 'SELECT `mID` FROM `Movies` WHERE `mID` = "{movie}"'.format(movie=row[0])
+                answer =cnx.query(sql)
+                if(len(answer['data'])>0):
+                    directors =row[1].split(",")
+                    for director in directors:
+                        if('\\' not in director):
+                            sql2 = 'INSERT INTO `Directors` (`mid`, `directorID`) VALUES ("{mid}", "{directorid}")'.format(mid=row[0], directorid = director)
+                            cnx.query(sql2)
+                    writers = row[2].split(",")
+                    for writer in writers:
+                        if('\\' not in writer):
+                            sql3 = 'INSERT INTO `writers` (`mid`, `writerID`) VALUES ("{mid}", "{wid}")'.format(mid = row[0], wid = writer)
+                            cnx.query(sql3)
+
+
+
+
+    //principas
+    sql = 'SELECT `mID` FROM `Movies` WHERE `mID` = "{movie}"'.format(movie=row[0])
+                answer =cnx.query(sql)
+                if(len(answer['data'])>0):
+                    if('\\' in row[5]):
+                        val ='NULL'
+                    else:
+                        temp =row[5].split('[')
+                        temp2 =temp[1].split(']')
+                        val = temp2[0]
+                        sql2 ='INSERT INTO `title_principals` (`mid`, `ordering`, `pid`, `category`, `job`, `Principalcharacter`) VALUES ("{mid}", {order}, "{pid}", "{category}", "{job}", {charc})'.format(mid=row[0],order =int(row[1]) if '\\' not in row[1] else "NULL", pid = row[2], category = row[3] if '\\' not in row[3] else "NULL", job = row[4] if '\\' not in row[4] else "NULL", charc= val)
+                        cnx.query(sql2)
+                ;
