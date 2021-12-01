@@ -1,16 +1,25 @@
-#main.py
-import uvicorn
-import json
 from mysqlCnx import MysqlCnx
+import json
+from pydantic import BaseModel
 from typing import Optional
-from fastapi import FastAPI,Request
-from pydantic import BaseModel;
-from fastapi.responses import RedirectResponse,HTMLResponse
+from fastapi import FastAPI
 
-with open('/var/www/html/Database/.config.json') as f:
+""""""
+with open('.config.json') as f:
     config = json.loads(f.read())
-
 cnx = MysqlCnx(**config)
+app = FastAPI()
+# LOCAL DB
+basics = {
+    1 : {"sql":"SELECT population FROM worldrrrrr WHERE name = 'Germany'","question":"Modify it to show the population of Germany."},
+    2 : {"sql":"SELECT name, population FROM world WHERE name IN ('Brazil', 'Russia', 'India', 'China');","question":"Modify it to show the population FROM 'Brazil', 'Russia', 'India', 'China'"},
+    3 : {"sql":"SELECT name, area FROM world WHERE area BETWEEN 250000 AND 300000" ,"question":"Modify it to show the name, area FROM world WHERE area BETWEEN 250000 AND 300000\n"}
+    }
+world = {
+    1 : {"sql":"SELECT name, continent, population FROM world","question":"Modify it to show the  name, continent, population FROM world."},
+    2 : {"sql":"SELECT name FROM world WHERE population = 64105700","question":"Modify it to show the population = 64105700"},
+    3 : {"sql":"SELECT name, population/1000000 FROM world WHERE continent = 'South America'" ,"question":"Modify it to show thename, population/1000000 FROM world WHERE continent = 'South America"}
+    }
 
 class teacher(BaseModel):
     id:int
@@ -19,7 +28,9 @@ class teacher(BaseModel):
     phone:Optional[str]= None
     mobile:Optional[str]= None
 
+## the class world is used for updating world table:
 class world(BaseModel):
+    
     name:str
     continent:Optional[str]= None
     area: Optional[float]= None
@@ -28,287 +39,62 @@ class world(BaseModel):
     capital:Optional[str]= None
     tld:Optional[str]= None
     flag:Optional[str]= None
-app = FastAPI()
 
-@app.get("/routes")
-def get_all_urls():
-    url_list = [{"path": route.path, "name": route.name} for route in app.routes]
-    return url_list
-
-@app.get("/",response_class=HTMLResponse)
+@app.get("/")
 async def root():
-    test ="""
-        <a href= basics>basics</a><br>
-        <a href= basics/1>basics individual</a><br>
-        <a href= world>world</a><br>
-        <a href= world/1>world individual</a><br>
-        <a href= nobel>nobel</a><br>
-        <a href= nobel/1>nobel individual</a><br>
-        <a href= within>within</a><br>
-        <a href= within/1>within individual</a><br>
-        <a href= aggregate>aggregate</a><br>
-        <a href= aggregate/1>aggregate individual</a><br>
-        <a href= joins>joins</a><br>
-        <a href= joins/1>joins individual</a><br>
-        <a href= all>all</a><br>
-    """
-    return test
+    return {"message": "Hello World"}
 
-
-@app.get("/basics",name ="basics") 
-async def getallbasic():
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname ='basics'") 
-    finalresult =[]
-    dictoparse = result['data']
-    for item in result['data']:
-        sql = item['query']
-        quest = item['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        finalresult.append(response)
-    return finalresult
-
-@app.get("/basics/{count}")
-async def getonebasic(count:int):
-    
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname ='basics' AND count ={count}")
-    if  len(result['data']) == 0 :
-        return result
-    else:
-        sql = result['data'][0]['query']
-        quest = result['data'][0]['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        return response
-
-@app.get("/world",name ="world")
-async def getworldall():
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname ='world'") 
-    finalresult =[]
-    dictoparse = result['data']
-    for item in result['data']:
-        sql = item['query']
-        quest = item['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        finalresult.append(response)
-    return finalresult
-
-@app.get("/world/{count}")
-async def getonworld(count:int):
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname ='world' AND count ={count}")
-    if  len(result['data']) == 0 :
-        return result
-    else:
-        sql = result['data'][0]['query']
-        quest = result['data'][0]['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        return response
-
-@app.get("/nobel",name ="nobel")
-async def getnobelall():
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname ='nobel'") 
-    finalresult =[]
-    dictoparse = result['data']
-    for item in result['data']:
-        sql = item['query']
-        quest = item['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        finalresult.append(response)
-    return finalresult
-
-@app.get("/nobel/{count}")
-async def getnobelone(count:int):
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname ='nobel' AND count ={count}")
-    if  len(result['data']) == 0 :
-        return result
-    else:
-        sql = result['data'][0]['query']
-        quest = result['data'][0]['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        return response
-
-@app.get("/within",name="within")
-async def getwithinall():
-    result = cnx.query(f"SELECT * FROM `sqlzoo` WHERE groupname LIKE 'SELECT%'") 
-    finalresult =[]
-    dictoparse = result['data']
-    for item in result['data']:
-        sql = item['query']
-        quest = item['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        finalresult.append(response)
-    return finalresult
-
-@app.get("/within/{count}")
-async def getwithinone(count:int):
-    result = cnx.query(f"SELECT * FROM sqlzoo WHERE groupname LIKE 'SELECT%' AND count ={count}")
-    if  len(result['data']) == 0 :
-        return result
-    else:
-        sql = result['data'][0]['query']
-        quest = result['data'][0]['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        return response
-
-@app.get("/aggregate", name="aggregate")
-async def getaggregateall():
-    result = cnx.query(f"SELECT * FROM `sqlzoo` WHERE groupname ='SUMndCOUNT'") 
-    finalresult =[]
-    dictoparse = result['data']
-    for item in result['data']:
-        sql = item['query']
-        quest = item['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        finalresult.append(response)
-    return finalresult
-
-@app.get("/aggregate/{count}")
-async def getaggregateone(count:int):
-    result = cnx.query(f"SELECT * FROM `sqlzoo` WHERE groupname ='SUMndCOUNT' AND count ={count}")
-    if  len(result['data']) == 0 :
-        return result
-    else:
-        sql = result['data'][0]['query']
-        quest = result['data'][0]['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        return response
-
-@app.get("/joins",name ="joins")
-async def getjoinsall():
-    result = cnx.query(f"SELECT * FROM `sqlzoo` WHERE groupname ='JOIN'") 
-    finalresult =[]
-    dictoparse = result['data']
-    for item in result['data']:
-        sql = item['query']
-        quest = item['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        finalresult.append(response)
-    return finalresult
-
-@app.get("/joins/{count}")
-async def getjoinsone(count:int):
-    result = cnx.query(f"SELECT * FROM `sqlzoo` WHERE groupname ='JOIN' AND count ={count}")
-    if  len(result['data']) == 0 :
-        return result
-    else:
-        sql = result['data'][0]['query']
-        quest = result['data'][0]['Question']
-        answer = cnx.query(sql)
-        response ={
-            'result':answer['data'],
-            'question':quest,
-            'sql':sql
-        }
-        return response
-        
-@app.get("/all")
-async def getall():
+@app.get("/basics/")
+async def read_item():
     response =[]
-    basic ={
-        "route":"/basics",
-        "Questions":[]
-    }
-    world ={
-        "route":"/world",
-        "Questions":[]
-    }
-    nobel ={
-        "route":"/nobel",
-        "Questions":[]
-    }
-    within ={
-        "route":"/within",
-        "Questions":[]
-    }
-    aggregate ={
-        "route":"/aggregate",
-        "Questions":[]
-    }
-    joins ={
-        "route":"/joins",
-        "Questions":[]
-    }
-    sql =f"""
-    SELECT Question, groupname FROM `sqlzoo`
-    GROUP BY groupname, Question
-    """
-    res = cnx.query(sql)
-    for item in res['data']:
-        if(item['groupname'] == 'basics'):
-            basic['Questions'].append(item['Question'])
-        elif(item['groupname'] == 'world'):
-            world['Questions'].append(item['Question'])
-        elif(item['groupname'] == 'nobel'):
-            nobel['Questions'].append(item['Question'])
-        elif(item['groupname'] == 'SELECTwithin' or item['groupname'] == 'SELECTwithin '):
-            within['Questions'].append(item['Question'])
-        elif(item['groupname'] == 'SUMndCOUNT'):
-            aggregate['Questions'].append(item['Question'])
-        elif(item['groupname'] == 'JOIN'):
-            joins['Questions'].append(item['Question'])
-    
-    response.append(basic)
-    response.append(world) 
-    response.append(nobel)   
-    response.append(within) 
-    response.append(aggregate) 
-    response.append(joins) 
+    for item in basics:
+        sql = basics[item]['sql']
+        question = basics[item]['question']
+        answer = cnx.query(sql)
+        result = {
+            'result':answer['data'],
+            'question':question,
+            'sql':sql
+        }
+        response.append(result)
     return response
+@app.get("/basics/{item}")    
+async def read_item(item:int):
+    sql = basics[item]['sql']
+    question = basics[item]['question']
+    answer = cnx.query(sql)
+    result = {
+        'result':answer['data'],
+        'question':question,
+        'sql':sql
+    }
 
-    
+@app.get("/world/")
+async def read_item():
+    response =[]
+    for item in world:
+        sql = world[item]['sql']
+        question = world[item]['question']
+        answer = cnx.query(sql)
+        result = {
+            'result':answer['data'],
+            'question':question,
+            'sql':sql
+        }
+        response.append(result)
+    return response
+@app.get("/world/{item}")    
+async def read_item(item:int):
+    sql = world[item]['sql']
+    question = world[item]['question']
+    answer = cnx.query(sql)
+    result = {
+        'result':answer['data'],
+        'question':question,
+        'sql':sql
+    }
+
+## Insert a new row into the teachers table.
 @app.post("/teacher")
 async def postteachers(item:teacher):
     sql = f"""
@@ -316,6 +102,18 @@ async def postteachers(item:teacher):
     VALUES ('{item.id}', '{item.dept}','{item.name}','{item.phone}', '{item.mobile}');"""
     res = cnx.query(sql)
     return res
+
+'''
+##Update the world table. so I should have a class:
+@app.post("/world/")
+async def create_world(world):
+    world_dict = world.dict()
+    if world.gdp:
+        p_with_gdp = 300 + world.gdp
+        word_dict.update({"p_with_gdp": p_with_gdp})
+    return world_dict 
+
+'''
 @app.patch("/worldpatch")
 async def patchworld(item:world):
     response ={}
@@ -343,10 +141,11 @@ async def patchworld(item:world):
     sql = sql + "'"+str(item.name)+"'"
     sql = sql + ";"
     res = cnx.query(sql)
-    return res
+    return res   
+        
     
-if __name__ == "__main__":
-  uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")
+    
+    
     
 
 
